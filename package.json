@@ -1,0 +1,25 @@
+{
+  "name": "rise-of-zoom",
+  "version": "1.0.0",
+  "description": "A video-meeting tower in the spirit of riseof.digital — take the lift, pick a floor, step into the room.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node test/smoke.js",
+    "test:mesh": "node test/mesh.js",
+    "test:interact": "node test/interact.js",
+    "test:shots": "node test/shots.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.49.1",
+    "socket.io-client": "^4.8.4"
+  }
+}

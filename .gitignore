@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# runtime state (floors, settings, blocklist, audit log, session secret)
+data/
+
+# test artefacts
+shots/
+*.log
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

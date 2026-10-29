@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Rise of Zoom — Meetings in a tower</title>
+<meta name="description" content="A video meeting tower. Take the lift, pick a floor, step into the room." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0b0d'/%3E%3Cpath d='M9 6h4v16h8v4H9z' fill='%23c8a86b'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/lobby.css" />
+</head>
+<body class="is-lobby">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<!-- ── top bar ─────────────────────────────────────────────── -->
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 40 40" width="24" height="24" fill="none">
+        <rect x="4.5" y="3.5" width="31" height="33" rx="2" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M4.5 13h31M4.5 27h31M20 3.5v33" stroke="currentColor" stroke-width=".8" opacity=".5"/>
+        <path d="M12 21.5 20 8l8 13.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
+      </svg>
+    </span>
+    <span class="brand__text">Rise<span class="brand__thin"> of </span>Zoom</span>
+  </a>
+
+  <div class="topbar__center">
+    <div class="indicator" id="floorIndicator">
+      <span class="indicator__level" id="indicatorLevel">G</span>
+      <span class="indicator__name" id="indicatorName">Lobby</span>
+    </div>
+  </div>
+
+  <div class="topbar__right">
+    <button class="ghost" id="soundToggle" type="button" aria-pressed="false">
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span id="soundLabel">Sound off</span>
+    </button>
+    <button class="ghost" id="menuToggle" type="button" aria-expanded="false">Menu</button>
+  </div>
+</header>
+
+<!-- ── left rail: the shaft ─────────────────────────────────── -->
+<aside class="rail" aria-hidden="true">
+  <div class="rail__cable"></div>
+  <div class="rail__car" id="railCar"><span id="railCarLevel">G</span></div>
+  <ul class="rail__floors" id="railFloors"></ul>
+</aside>
+
+<!-- ── the tower ────────────────────────────────────────────── -->
+<main class="shaft" id="shaft">
+
+  <section class="floor floor--hero" data-floor="lobby" data-level="G" data-kind="lobby">
+    <div class="floor__shaft" aria-hidden="true"><div class="floor__ribs"></div><div class="floor__lamp"></div></div>
+    <div class="floor__bay">
+    <div class="floor__portal">
+      <div class="floor__numeral floor__numeral--g" aria-hidden="true">G</div>
+      <div class="floor__stage">
+        <div class="stage__inner">
+          <p class="eyebrow">G · Lobby<span class="eyebrow__tr">Lobi</span></p>
+          <h1 class="display display--hero">
+            Every meeting<br />
+            starts on the <em>ground floor</em>.
+          </h1>
+          <p class="lede lede--wide">
+            Twelve businesses asleep, their software still at work. Rise of Zoom is a tower of video rooms —
+            one lift, seven floors, and a live connection waiting behind every door.
+            <span class="lede__tr">Görüşmeler zeminden başlar. Asansörü çağırın, kat seçin, kapıdan geçin.</span>
+          </p>
+
+          <div class="hero__actions">
+            <button class="btn btn--gold" id="callLift" type="button">
+              <span class="btn__label">Call the lift</span>
+              <span class="btn__tr">Asansörü çağırın</span>
+            </button>
+            <form class="joinform" id="joinForm" autocomplete="off">
+              <label class="joinform__label" for="joinCode">Or enter a room code</label>
+              <div class="joinform__row">
+                <input id="joinCode" name="code" maxlength="8" placeholder="ROOM" spellcheck="false" aria-label="Room code" />
+                <button class="btn btn--ghost" type="submit">Step in</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="hero__meta">
+            <span class="live"><i class="live__dot"></i><span id="liveCount">0</span> connected right now</span>
+            <span class="hero__hint" id="scrollHint">Scroll to take the lift up</span>
+          </div>
+        </div>
+      </div>
+      <div class="floor__doors" aria-hidden="true"><i class="door door--l"></i><i class="door door--r"></i><span class="door__seam"></span></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── floor template ──────────────────────────────────────── -->
+<template id="floorTemplate">
+  <section class="floor">
+    <div class="floor__shaft" aria-hidden="true"><div class="floor__ribs"></div><div class="floor__lamp"></div></div>
+    <div class="floor__bay">
+    <div class="floor__portal">
+      <div class="floor__numeral" aria-hidden="true"></div>
+      <div class="floor__stage">
+        <div class="stage__inner">
+          <p class="eyebrow"><span class="f-level"></span><span class="f-tr"></span></p>
+          <h2 class="display display--floor"></h2>
+          <p class="lede f-body"></p>
+          <p class="lede f-body-tr"></p>
+          <div class="floor__foot">
+            <span class="occupancy"><i class="live__dot"></i><span class="occ-count">0</span> in the room</span>
+            <a class="btn btn--gold" href="#"><span class="btn__label">Enter the room</span><span class="btn__tr">İçeri girin</span></a>
+          </div>
+        </div>
+      </div>
+      <div class="floor__doors" aria-hidden="true"><i class="door door--l"></i><i class="door door--r"></i><span class="door__seam"></span></div>
+    </div>
+    </div>
+  </section>
+</template>
+
+<!-- ── menu overlay ────────────────────────────────────────── -->
+<div class="menu" id="menu" hidden>
+  <div class="menu__inner">
+    <div class="menu__head">
+      <p class="eyebrow">Index<span class="eyebrow__tr">Menü</span></p>
+      <button class="ghost" id="menuClose" type="button">Close</button>
+    </div>
+    <ul class="menu__list" id="menuList"></ul>
+    <div class="menu__foot">
+      <a class="btn btn--ghost" href="/admin">Control room</a>
+      <span class="menu__note">Admin area · password required</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── door transition ─────────────────────────────────────── -->
+<div class="transition" id="transition" hidden>
+  <i class="transition__leaf transition__leaf--l"></i>
+  <i class="transition__leaf transition__leaf--r"></i>
+  <div class="transition__label" id="transitionLabel"></div>
+</div>
+
+<script src="/config.js"></script>
+<script src="/js/lobby.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+services:
+  tower:
+    build: .
+    image: rise-of-zoom
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    environment:
+      # Secrets — change these before exposing the tower to the internet.
+      ADMIN_OWNER_PASSWORD: "${ADMIN_OWNER_PASSWORD:-6xtXBG78|\"o_iXDZY]3a}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-Jmw£V63Gt@9aRO@9(`E,}"
+      SESSION_SECRET: "${SESSION_SECRET:-}"
+      # A TURN relay makes calls work behind strict NAT / corporate firewalls.
+      TURN_URLS: "${TURN_URLS:-}"
+      TURN_USERNAME: "${TURN_USERNAME:-}"
+      TURN_CREDENTIAL: "${TURN_CREDENTIAL:-}"
+    volumes:
+      - tower-data:/app/data
+
+volumes:
+  tower-data:

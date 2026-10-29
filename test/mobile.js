@@ -1,0 +1,21 @@
+const { chromium } = require('playwright-core');
+const URL = 'http://127.0.0.1:4321';
+(async () => {
+  const browser = await chromium.launch({ args: ['--no-sandbox','--disable-dev-shm-usage','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream'] });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, permissions: ['camera','microphone'] });
+  const page = await ctx.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(e.message));
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: '/home/user/shots/20-mobile-lobby.png' });
+  await page.goto(URL + '/room/f03', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1800);
+  await page.screenshot({ path: '/home/user/shots/21-mobile-prejoin.png' });
+  await page.fill('#nameInput', 'Ada');
+  await page.click('#joinBtn');
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: '/home/user/shots/22-mobile-room.png' });
+  console.log('mobile errors:', errs.length ? errs.join(' | ') : 'none');
+  await browser.close();
+})();
