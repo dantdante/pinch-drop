@@ -50,16 +50,38 @@ fi
 
 echo "→ creating the repository through the GitHub API"
 USER=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/user | sed -n 's/.*"login": *"\([^"]*\)".*/\1/p' | head -1)
-curl -fsS -X POST \
+if [ -z "$USER" ]; then
+  echo "Could not read the authenticated user — is the token valid?" >&2
+  exit 1
+fi
+
+HTTP_CODE=$(curl -sS -o /tmp/roz-repo.json -w '%{http_code}' -X POST \
   -H "Authorization: Bearer $GITHUB_TOKEN" \
   -H "Accept: application/vnd.github+json" \
   https://api.github.com/user/repos \
-  -d "{\"name\":\"$REPO_SLUG\",\"description\":\"$DESCRIPTION\",\"private\":false,\"topics\":[\"$(echo $TOPICS | tr ' ' ',')\"]}" \
-  -o /dev/null
+  -d "{\"name\":\"$REPO_SLUG\",\"description\":\"$DESCRIPTION\",\"private\":false,\"topics\":[\"$(echo $TOPICS | tr ' ' ',')\"]}")
+
+if [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "422" ]; then
+  echo "Repository creation failed (HTTP $HTTP_CODE):" >&2
+  cat /tmp/roz-repo.json >&2
+  echo >&2
+  exit 1
+fi
+if [ "$HTTP_CODE" = "422" ]; then
+  echo "→ repository $USER/$REPO_SLUG already exists — pushing to it"
+fi
 
 git remote remove origin 2>/dev/null || true
 git remote add origin "https://github.com/$USER/$REPO_SLUG.git"
-git push -u origin main
+
+# Push with the token as an ephemeral HTTP header so it never lands in .git/config.
+BASIC=$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')
+git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $BASIC" push -u origin main
+
+# Leave the remote pointing at the clean URL — no credentials inside the repo config.
+git remote set-url origin "https://github.com/$USER/$REPO_SLUG.git"
 
 echo
 echo "Done. Open: https://github.com/$USER/$REPO_SLUG"
+echo "Next: deploy to Railway (New project → Deploy from GitHub repo),"
+echo "or enable GitHub Pages — set the SIGNALLING_URL repository variable to your backend."
