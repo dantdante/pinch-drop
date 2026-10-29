@@ -20,7 +20,8 @@
     "docker:build": "docker build -t rise-of-zoom .",
     "docker:up": "docker compose up -d",
     "publish:github": "bash scripts/publish-github.sh",
-    "publish:pages": "bash scripts/publish-pages.sh"
+    "publish:pages": "bash scripts/publish-pages.sh",
+    "deploy:render": "bash scripts/deploy-render.sh"
   },
   "engines": {
     "node": ">=18"
