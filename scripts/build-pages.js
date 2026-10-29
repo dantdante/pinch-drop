@@ -32,7 +32,28 @@ function arg(name, fallback) {
   return fallback;
 }
 
-const API_BASE = (arg('api-base', process.env.SIGNALLING_URL) || '').replace(/\/$/, '');
+/* Where the signalling server lives, in order of precedence:
+     1. --api-base <url>
+     2. the SIGNALLING_URL environment variable
+     3. deploy.json in the repository root
+   Keeping it in the repository means CI needs no extra configuration. */
+function configuredApiBase() {
+  const flag = arg('api-base', process.env.SIGNALLING_URL);
+  if (flag) return flag;
+
+  const deployFile = path.join(ROOT, 'deploy.json');
+  if (fs.existsSync(deployFile)) {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(deployFile, 'utf8'));
+      if (cfg && cfg.apiBase) return cfg.apiBase;
+    } catch (_) {
+      /* fall through */
+    }
+  }
+  return '';
+}
+
+const API_BASE = (configuredApiBase() || '').replace(/\/$/, '');
 const OUT = path.resolve(ROOT, arg('out', '_site'));
 
 /* ------------------------------------------------------------------ */

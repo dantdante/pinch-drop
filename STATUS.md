@@ -6,48 +6,33 @@ _Last updated: 29 October 2026_
 
 | Thing | Address | State |
 | --- | --- | --- |
-| GitHub Pages site | https://dantdante.github.io/pinch-drop/ | ✅ live, 14 assets, tower renders 7 floors |
-| GitHub repo | https://github.com/dantdante/pinch-drop | ✅ public, MIT, 8 topics |
+| **The website** | https://dantdante.github.io/pinch-drop/ | ✅ live — static on GitHub Pages |
+| **The backend** | https://pinch-drop.onrender.com | ✅ live — Render, Docker image, `/api/health` |
+| **The repo** | https://github.com/dantdante/pinch-drop | ✅ public, MIT |
 | Local preview | http://0.0.0.0:4321 | ✅ running |
-| Render backend | — | ⏳ waiting on a Render API key |
 
-The Pages site currently shows the "signalling server unreachable" notice because no
-backend exists yet. It renders the complete tower from a built-in fallback catalogue
-while it waits.
+The two halves talk to each other over the public internet: the Pages site loads its
+interface from GitHub, and `config.js` points it at the Render backend. Verified with
+`node test/live.js` — 15/15, including real peer-to-peer video and a real audio signal
+between two browsers on different origins.
 
-## What is committed but not pushed
-
-Two commits sit on top of `origin/main` because GitHub refuses to let a token
-**create** workflow files without the `workflow` scope:
+## Layout
 
 ```
-2eec4d0  Add CI, GitHub Pages and Docker workflows
-ebb5d50  Add a Render deployment script
+public/                 the interface — lobby, room, control room
+  img/                  the pd monogram, favicon and apple-touch icon
+  js/host.js            knows server mode vs static mode, builds the links
+server/                 Express + Socket.IO signalling, floors, control room
+scripts/build-pages.js  builds the static site for GitHub Pages
+scripts/publish-pages.sh publishes it to the gh-pages branch
+scripts/deploy-render.sh creates and deploys the Render service
+scripts/publish-github.sh creates the repo and pushes
+render.yaml             Render Blueprint
+deploy.json             where the signalling server lives
+Dockerfile              the whole tower in one image
 ```
-
-Push them with:
-
-```bash
-cd /home/user/pinch-drop
-TOKEN=<github token>
-BASIC=$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\n')
-git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $BASIC" push origin main
-```
-
-## Waiting on the user
-
-1. **Render API key** — https://render.com/docs/api → Create API key (`rnd_…`).
-   With it, `bash scripts/deploy-render.sh` creates the web service, deploys the
-   Docker image and prints the `onrender.com` address.
-
-2. **Workflows permission** — the fine-grained GitHub token needs
-   *Repository permissions → Workflows → Read and write*.
-   If that does not take effect, a **classic** token with the `workflow` scope
-   checked works too.
 
 ## Test suite
-
-All seven suites pass (the server must be running on 4321):
 
 ```bash
 node test/smoke.js        # 22/22  API, signalling, rooms, blocklist
@@ -57,32 +42,51 @@ node test/interact.js     # 8/8    lift, doors, sound, roles
 node test/offline.js      # 13/13  fallback catalogue, notice, cold start
 node test/static-site.js  # 17/17  static host from a second origin
 node test/mesh.js         # PASS   peer-to-peer video both ways
+node test/live.js         # 15/15  the real deployment, over the internet
 ```
 
-## After Render is up
+`test/live.js` drives the published site, not a local copy — it is the one that proves
+the deployment works.
+
+## Still to do
+
+**The CI and Docker workflows are parked.** GitHub refuses to let a personal access
+token *create* workflow files without the `workflow` scope, so `.github/workflows/` was
+removed from `main`'s history and kept on the local branch `ci-workflows`.
+
+To put them back, either:
+
+- give the fine-grained token **Repository permissions → Workflows → Read and write**, or
+- use a **classic** token with the `workflow` scope checked.
+
+Then:
 
 ```bash
-# 1 · point the static site at the backend and publish it
-GITHUB_TOKEN=<token> bash scripts/publish-pages.sh https://<name>.onrender.com
-
-# 2 · set the variable so CI builds with the same address
-#     Settings → Secrets and variables → Actions → Variables
-#     SIGNALLING_URL = https://<name>.onrender.com
-
-# 3 · check it end to end
-curl https://<name>.onrender.com/api/health
+git checkout ci-workflows -- .github/workflows
+git add .github/workflows
+git commit -m "Add CI, GitHub Pages and Docker workflows"
+git push origin main
 ```
 
-## Layout
+The Pages site does not depend on this — `scripts/publish-pages.sh` publishes it
+directly, and the `pages` job in `ci.yml` does the same thing automatically once the
+workflows are back.
 
-```
-server/       Express + Socket.IO signalling, floors, control room
-public/       the interface — lobby, room, control room
-public/js/host.js      knows server mode vs static mode, builds the links
-scripts/build-pages.js builds the static site for GitHub Pages
-scripts/publish-pages.sh publishes it to the gh-pages branch
-scripts/deploy-render.sh creates and deploys the Render service
-scripts/publish-github.sh creates the repo and pushes
-render.yaml   Render Blueprint
-Dockerfile    the whole tower in one image
-```
+## Notes on the free tier
+
+Render's free plan sleeps the service after 15 idle minutes, so the first request
+after a pause waits for the container to wake. The lobby tells a sleeping backend
+apart from a missing one: a hung request shows *"The signalling server is waking up"*
+with a **Try again** button. Free plans also have no persistent disk, so floors, the
+blocklist and the audit log reset when the service restarts. Both are fixed by moving
+to the `starter` plan — uncomment the `disk:` block in `render.yaml` at the same time.
+
+## Credentials
+
+- Owner password: `6xtXBG78|"o_iXDZY]3a`
+- Operator password: `Jmw£V63Gt@9aRO@9(`E,`
+
+Both are set as environment variables on the Render service and are the defaults in
+`server/config.js`. Changing a password in the control room writes it to
+`data/credentials.json` — on Render that file lives on an ephemeral disk, so it resets
+on redeploy unless a persistent disk is attached.

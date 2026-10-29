@@ -89,10 +89,13 @@ signalling. Set the API base in `public/config.js`:
 window.PINCH_DROP = { apiBase: 'https://pinch-drop.onrender.com' };
 ```
 
-The `pages` job in `ci.yml` does this automatically using the **SIGNALLING_URL** repository
-variable, so a Pages build points at your hosted backend with no edits. Set it in
-**Settings → Secrets and variables → Actions → Variables**: `SIGNALLING_URL =
-https://pinch-drop.onrender.com`.
+The `pages` job in `ci.yml` does this automatically — it reads the address from
+**`deploy.json`** in the repository root, so a Pages build points at your hosted
+backend with no edits and no extra configuration:
+
+```json
+{ "apiBase": "https://pinch-drop.onrender.com" }
+```
 
 > WebRTC needs a secure context. GitHub Pages is already HTTPS; your backend must be too —
 > Render gives you HTTPS by default.

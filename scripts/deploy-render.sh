@@ -45,6 +45,21 @@ fi
 export RENDER_OUTPUT=json
 export RENDER_CLI_DISABLE_ANALYTICS=1
 
+# The control-room credentials. They are never written into this file —
+# export them before running:
+#
+#   export ADMIN_OWNER_PASSWORD='…'
+#   export ADMIN_PASSWORD='…'
+#
+OWNER_PASSWORD="${ADMIN_OWNER_PASSWORD:-}"
+OPERATOR_PASSWORD="${ADMIN_PASSWORD:-}"
+if [ -z "$OWNER_PASSWORD" ] || [ -z "$OPERATOR_PASSWORD" ]; then
+  echo "Set ADMIN_OWNER_PASSWORD and ADMIN_PASSWORD before deploying:" >&2
+  echo "  export ADMIN_OWNER_PASSWORD='…'   # the owner password" >&2
+  echo "  export ADMIN_PASSWORD='…'         # the operator password" >&2
+  exit 1
+fi
+
 echo "→ workspaces"
 WORKSPACES=$("$RENDER" workspaces -o json --confirm 2>/dev/null || echo '[]')
 WORKSPACE_ID=$(printf '%s' "$WORKSPACES" | node -e "
@@ -78,8 +93,8 @@ SERVICE=$("$RENDER" services create \
   --health-check-path /api/health \
   --env-var NODE_ENV=production \
   --env-var HOST=0.0.0.0 \
-  --env-var "ADMIN_OWNER_PASSWORD=${ADMIN_OWNER_PASSWORD:-6xtXBG78|\"o_iXDZY]3a}" \
-  --env-var "ADMIN_PASSWORD=${ADMIN_PASSWORD:-Jmw£V63Gt@9aRO@9(\`E,}" \
+  --env-var "ADMIN_OWNER_PASSWORD=$OWNER_PASSWORD" \
+  --env-var "ADMIN_PASSWORD=$OPERATOR_PASSWORD" \
   --env-var ALLOWED_ORIGINS=https://dantdante.github.io \
   --output json --confirm 2>&1) || {
     echo "$SERVICE" | tail -20 >&2

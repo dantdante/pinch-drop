@@ -15,6 +15,7 @@
     "test:shots": "node test/shots.js",
     "test:offline": "node test/offline.js",
     "test:static": "node test/static-site.js",
+    "test:live": "node test/live.js",
     "build:pages": "node scripts/build-pages.js",
     "setup:browser": "npx playwright install --with-deps chromium",
     "docker:build": "docker build -t pinch-drop .",
