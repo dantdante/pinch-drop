@@ -44,29 +44,54 @@ git push -u origin main
 | `.github/workflows/ci.yml` | Runs the whole test suite on every push, then publishes GitHub Pages |
 | `.github/workflows/docker.yml` | Builds `ghcr.io/<you>/rise-of-zoom` on a `v*` tag |
 | `Dockerfile` / `docker-compose.yml` | The whole tower in one container |
+| `railway.json` | One-click deploy to Railway — builds the Dockerfile, healthcheck on `/api/health` |
+| `.env.example` | Every environment variable with its default and what it controls |
 | `scripts/publish-github.sh` | One-command repository creation and push |
 | `public/config.js` | Where the client looks for the signalling server |
 | `LICENSE` | MIT |
 
-### Two ways to host it
+### Three ways to host it
 
-**A · Everything in one place (recommended).** Run the Node server anywhere that speaks HTTPS
-and WebSockets — a VPS, Fly.io, Railway, Render, a home server, a container host.
+**A · The whole tower on Railway (recommended for this repo).** Railway reads `railway.json`,
+builds the `Dockerfile` and serves the app over HTTPS with WebSockets on one domain — lobby,
+rooms and control room all on `https://<your-app>.up.railway.app`.
+
+1. Push the repo to GitHub (see [Publishing to GitHub](#publishing-to-github)).
+2. In Railway: **New project → Deploy from GitHub repo → pick `rise-of-zoom`**. Railway
+   detects `railway.json` and the `Dockerfile` automatically — no build command needed.
+3. Railway assigns a `PORT` and a public domain. The app already honours `PORT` and binds
+   `0.0.0.0`, so nothing else has to change.
+4. Add a volume mounted at `/app/data` if you want floors, blocklist, audit log and changed
+   passwords to survive restarts. Without a volume the app detects the read-only filesystem
+   and keeps state in memory instead.
+5. Optional variables (all have sane defaults — see `.env.example`):
+   `ADMIN_OWNER_PASSWORD`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `TURN_URLS`, `TURN_USERNAME`,
+   `TURN_CREDENTIAL`, `MAX_PARTICIPANTS`.
+
+`railway.json` builds with the Dockerfile and declares `/api/health` as the healthcheck path.
+
+**B · Everything in one place, elsewhere.** Run the Node server anywhere that speaks HTTPS
+and WebSockets — a VPS, Fly.io, Render, a home server, a container host.
 
 ```bash
 docker compose up -d          # or: npm start
 ```
 
-**B · Static lobby on GitHub Pages + the signalling server elsewhere.** GitHub Pages serves
+**C · Static lobby on GitHub Pages + the signalling server on Railway.** GitHub Pages serves
 only files, so it can host the beautiful tower interface while the Node server does the
 signalling. Set the API base in `public/config.js`:
 
 ```js
-window.RISE_OF_ZOOM = { apiBase: 'https://your-tower.example.com' };
+window.RISE_OF_ZOOM = { apiBase: 'https://your-tower.up.railway.app' };
 ```
 
 The `pages` job in `ci.yml` does this automatically using the **SIGNALLING_URL** repository
-variable, so a Pages build points at your hosted backend with no edits.
+variable, so a Pages build points at your hosted backend with no edits. Set it in
+**Settings → Secrets and variables → Actions → Variables**: `SIGNALLING_URL =
+https://your-tower.up.railway.app`.
+
+> WebRTC needs a secure context. GitHub Pages is already HTTPS; your backend must be too —
+> Railway gives you HTTPS by default.
 
 ---
 
@@ -200,6 +225,7 @@ Rooms hold 12 people by default (`MAX_PARTICIPANTS`).
 | `TURN_URLS` | — | Comma-separated TURN URLs — **set this for strict networks** |
 | `TURN_USERNAME` | — | TURN credential name |
 | `TURN_CREDENTIAL` | — | TURN credential |
+| `DATA_DIR` | `./data` | Where floors, settings, blocklist, audit log and changed passwords are written |
 
 ### Notes on production
 

@@ -9,7 +9,6 @@ RUN npm ci --omit=dev --no-audit --no-fund
 
 COPY server ./server
 COPY public ./public
-COPY config.js ./
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0

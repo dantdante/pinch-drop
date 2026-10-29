@@ -4,7 +4,11 @@ const path = require('path');
 const fs = require('fs');
 
 const ROOT = path.resolve(__dirname, '..');
-const DATA_DIR = path.join(ROOT, 'data');
+// Where floors / settings / blocklist / audit / credentials are written.
+// Override with DATA_DIR (absolute path, or relative to the project root).
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(ROOT, process.env.DATA_DIR)
+  : path.join(ROOT, 'data');
 
 /**
  * Some hosts (read-only containers, serverless) refuse disk writes. We probe once
