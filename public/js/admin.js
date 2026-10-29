@@ -11,6 +11,7 @@
   /* Deployment configuration — see /config.js */
   const CFG = window.RISE_OF_ZOOM || {};
   const API = (CFG.apiBase || '').replace(/\/$/, '');
+  const ROZ = window.ROZ || {};
 
   const gate = $('#gate');
   const dash = $('#dash');
@@ -31,13 +32,23 @@
    * The control room subscribes to the signalling server so the tables update
    * the moment something changes, instead of waiting for the next poll.
    */
-  function connectLive(token) {
-    if (!token || typeof io !== 'function') return;
+  async function connectLive(token) {
+    if (!token) return;
+    /* The Socket.IO client is fetched from the signalling origin, which is
+       not the page origin when the control room is served statically. */
+    let ioClient;
+    try {
+      ioClient = await (ROZ.ensureSocketIO ? ROZ.ensureSocketIO() : Promise.resolve(window.io));
+    } catch (err) {
+      console.warn('live updates unavailable', err);
+      renderLiveBadge();
+      return;
+    }
     if (state.socket) {
       state.socket.disconnect();
       state.socket = null;
     }
-    const socket = io(API || undefined, { transports: ['websocket', 'polling'] });
+    const socket = ioClient(API || undefined, { transports: ['websocket', 'polling'] });
     state.socket = socket;
     socket.on('connect', () => {
       socket.emit('admin:subscribe', { token }, (ack) => {
@@ -93,7 +104,15 @@
   }
 
   async function api(path, options) {
-    const res = await fetch(API + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options || {}));
+    /* The session travels in an Authorization header as well as in the
+       httpOnly cookie. A static front-end (GitHub Pages) cannot rely on the
+       cookie, because browsers do not send cookies across origins. */
+    const opts = Object.assign({}, options || {});
+    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    if (state.token && !opts.headers.Authorization) {
+      opts.headers.Authorization = 'Bearer ' + state.token;
+    }
+    const res = await fetch(API + path, opts);
     let data = null;
     try {
       data = await res.json();

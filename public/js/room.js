@@ -4,13 +4,20 @@
    audio metering and autoplay-safe remote audio.
    ========================================================== */
 
-(function () {
+(async function () {
   'use strict';
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const roomId = decodeURIComponent(location.pathname.replace(/^\/room\//, '').replace(/\/+$/, '')) || 'lobby';
+  /* Server mode → /room/f01. Static mode → room.html?room=f01. */
+  const ROZ = window.ROZ || {};
+  const roomId = (() => {
+    const path = location.pathname.replace(/^\/room\//, '').replace(/\/+$/, '');
+    if (path && path !== location.pathname) return decodeURIComponent(path);
+    const q = new URLSearchParams(location.search).get('room');
+    return q ? decodeURIComponent(q) : 'lobby';
+  })();
 
   const grid = $('#grid');
   const emptyState = $('#emptystate');
@@ -27,7 +34,23 @@
   const CFG = window.RISE_OF_ZOOM || {};
   const API = (CFG.apiBase || '').replace(/\/$/, '');
 
-  const socket = io(API || undefined, { transports: ['websocket', 'polling'], upgrade: true });
+  /* The Socket.IO client comes from the signalling origin — the same origin
+     in a one-server deploy, the API origin when the page is hosted statically. */
+  let ioClient;
+  try {
+    ioClient = await (ROZ.ensureSocketIO ? ROZ.ensureSocketIO() : Promise.resolve(window.io));
+  } catch (err) {
+    console.error(err);
+    document.body.innerHTML =
+      '<div style="max-width:40rem;margin:18vh auto;padding:2rem;font:400 1rem/1.6 Helvetica,Arial,sans-serif;color:#e8e4da;background:#0d0f12">' +
+      '<h1 style="font-size:1.6rem;margin:0 0 .75rem">Signalling server unreachable</h1>' +
+      '<p style="opacity:.7;margin:0">The Socket.IO client could not be loaded from <code>' +
+      ((ROZ.API || location.origin)) + '</code>. Check that the backend is running and that ' +
+      '<code>apiBase</code> in <code>config.js</code> is correct.</p></div>';
+    return;
+  }
+
+  const socket = ioClient(API || undefined, { transports: ['websocket', 'polling'], upgrade: true });
 
   const state = {
     selfId: null,
@@ -660,17 +683,17 @@
 
   socket.on('room:closed', ({ reason }) => {
     toast(reason || 'The room was closed.', 'warn');
-    setTimeout(() => (location.href = '/'), 1800);
+    setTimeout(() => (location.href = ROZ.homeUrl ? ROZ.homeUrl() : '/'), 1800);
   });
 
   socket.on('server:kicked', ({ reason }) => {
     toast(reason || 'You were removed from the room.', 'warn');
-    setTimeout(() => (location.href = '/'), 1800);
+    setTimeout(() => (location.href = ROZ.homeUrl ? ROZ.homeUrl() : '/'), 1800);
   });
 
   socket.on('server:blocked', ({ reason }) => {
     toast(reason || 'Access denied.', 'warn');
-    setTimeout(() => (location.href = '/'), 1800);
+    setTimeout(() => (location.href = ROZ.homeUrl ? ROZ.homeUrl() : '/'), 1800);
   });
 
   socket.on('connect_error', () => {
@@ -1100,7 +1123,7 @@
     if (state.localStream) state.localStream.getTracks().forEach((t) => t.stop());
     if (state.screenStream) state.screenStream.getTracks().forEach((t) => t.stop());
     if (recorder.active) stopRecording();
-    if (!silent) location.href = '/';
+    if (!silent) location.href = ROZ.homeUrl ? ROZ.homeUrl() : '/';
   }
 
   function startClock() {

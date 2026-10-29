@@ -6,6 +6,9 @@ data/
 
 # test artefacts
 shots/
+test/.static-build/
+test/.dbg-static/
+_site/
 *.log
 
 # editors / OS

@@ -12,8 +12,34 @@ const store = require('./rooms');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: true, credentials: true },
+  cors: {
+    // Reflect the caller's origin so a static front-end (GitHub Pages) can
+    // open the socket against a backend hosted elsewhere. Lock it down with
+    // ALLOWED_ORIGINS — see server/config.js. A missing Origin header means a
+    // non-browser client (server-to-server, the test suite) and is allowed.
+    origin: (origin, cb) => cb(null, !origin || config.originAllowed(origin)),
+    credentials: true
+  },
   maxHttpBufferSize: 1e6
+});
+
+/* ------------------------------------------------------------------ */
+/* CORS — the lobby/rooms/control room may be served as plain files  */
+/* from a static host while the signalling server runs elsewhere, so   */
+/* the JSON API has to answer cross-origin requests.                   */
+/* ------------------------------------------------------------------ */
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && config.originAllowed(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
 });
 
 app.use(express.json({ limit: '256kb' }));

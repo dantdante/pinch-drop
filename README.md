@@ -47,7 +47,9 @@ git push -u origin main
 | `railway.json` | One-click deploy to Railway — builds the Dockerfile, healthcheck on `/api/health` |
 | `.env.example` | Every environment variable with its default and what it controls |
 | `scripts/publish-github.sh` | One-command repository creation and push |
+| `scripts/build-pages.js` | Builds the static site for GitHub Pages — relative paths, API base, `static: true` |
 | `public/config.js` | Where the client looks for the signalling server |
+| `public/js/host.js` | Knows whether the app is served by the server or as static files, and builds the right links |
 | `LICENSE` | MIT |
 
 ### Three ways to host it
@@ -92,6 +94,41 @@ https://your-tower.up.railway.app`.
 
 > WebRTC needs a secure context. GitHub Pages is already HTTPS; your backend must be too —
 > Railway gives you HTTPS by default.
+
+---
+
+## The static / backend split
+
+The app is deliberately built so the **interface** and the **signalling server** can live
+apart. That is what makes a GitHub Pages site possible.
+
+| | Served by the Node server | Served as static files |
+| --- | --- | --- |
+| Lobby | `/` | `index.html` |
+| Room | `/room/f01` | `room.html?room=f01` |
+| Control room | `/admin` | `admin.html` |
+| Assets | `/css/…`, `/js/…` | `./css/…`, `./js/…` |
+| Socket.IO client | same origin | the backend's origin |
+
+`public/js/host.js` reads `window.RISE_OF_ZOOM` and builds the right links for whichever
+mode is active, so the same source runs in both places.
+
+Two details make the split work:
+
+- **CORS.** The API answers cross-origin requests and reflects the caller's origin.
+  Set `ALLOWED_ORIGINS` to a comma separated list to lock it down to your own Pages domain.
+- **Bearer tokens.** The control-room session rides in an `Authorization: Bearer …` header
+  as well as in the httpOnly cookie, because browsers refuse to send cookies to a different
+  origin and block third-party cookies by default.
+
+If the backend cannot be reached, the lobby still renders the whole tower from a built-in
+fallback catalogue and shows a clear notice instead of an empty building.
+
+Build the static site locally with:
+
+```bash
+npm run build:pages -- --api-base https://your-tower.up.railway.app --out _site
+```
 
 ---
 
@@ -226,6 +263,7 @@ Rooms hold 12 people by default (`MAX_PARTICIPANTS`).
 | `TURN_USERNAME` | — | TURN credential name |
 | `TURN_CREDENTIAL` | — | TURN credential |
 | `DATA_DIR` | `./data` | Where floors, settings, blocklist, audit log and changed passwords are written |
+| `ALLOWED_ORIGINS` | every origin | Comma-separated origins allowed to call the API from a browser |
 
 ### Notes on production
 

@@ -123,9 +123,27 @@ function parseCookies(req) {
   return out;
 }
 
+/**
+ * The session may arrive two ways:
+ *
+ *   1. the httpOnly cookie, which is what the same-origin deploy uses
+ *   2. an `Authorization: Bearer <token>` header, which is what a static
+ *      front-end (GitHub Pages) has to use — browsers refuse to send
+ *      cookies to a different origin, and third-party cookies are blocked
+ *      by default in most browsers now.
+ *
+ * The cookie wins when both are present.
+ */
 function getSession(req) {
   const cookies = parseCookies(req);
-  const payload = verifyToken(cookies[COOKIE]);
+  let payload = verifyToken(cookies[COOKIE]);
+
+  if (!payload) {
+    const header = req.headers.authorization || '';
+    const match = /^Bearer\s+(.+)$/i.exec(String(header).trim());
+    if (match) payload = verifyToken(match[1].trim());
+  }
+
   if (!payload || !RANK[payload.role]) return null;
   return payload;
 }

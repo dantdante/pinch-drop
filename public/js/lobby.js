@@ -8,6 +8,7 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   /* Deployment configuration — see /config.js */
   const CFG = window.RISE_OF_ZOOM || {};
   const API = (CFG.apiBase || '').replace(/\/$/, '');
+  const ROZ = window.ROZ || {};
 
 const shaft = $('#shaft');
 const floorTemplate = $('#floorTemplate');
@@ -26,6 +27,61 @@ const state = {
   sections: [],
   activeIndex: 0
 };
+
+/* ------------------------------------------------------------------ */
+/* Fallback catalogue.                                               */
+/*                                                                     */
+/* When the lobby is served from a static host (GitHub Pages) and     */
+/* the signalling server is unreachable — or not configured yet —     */
+/* the tower still renders in full from this mirror of the server's   */
+/* catalogue. The names, floors and copy are identical to the        */
+/* defaults in server/config.js, so the building is never empty.      */
+/* ------------------------------------------------------------------ */
+
+const FALLBACK_FLOORS = [
+  { id: 'lobby', level: 'G', name: 'Lobby', nameTr: 'Lobi',
+    tagline: 'Every call starts on the ground floor.',
+    taglineTr: 'Her görüşme zemin kattan başlar.',
+    body: 'The lift is here, the doors are open, and the whole tower is one signal away. Choose a floor and step inside.',
+    bodyTr: 'Asansör burada, kapılar açık, kule tek bir sinyal uzakta. Bir kat seçin ve içeri girin.',
+    accent: 'brass', room: false, enabled: true },
+  { id: 'f01', level: '01', name: 'Identity', nameTr: 'Kimlik',
+    tagline: 'A room becomes a place.',
+    taglineTr: 'Bir oda bir mekâna dönüşür.',
+    body: 'Where names become marks and faces become the mark. The first floor is for introductions.',
+    bodyTr: 'İsimlerin markaya, yüzlerin işarete dönüştüğü yer. İlk kat tanışmalar içindir.',
+    accent: 'brass', room: true, enabled: true },
+  { id: 'f02', level: '02', name: 'Design', nameTr: 'Tasarım',
+    tagline: 'Then it learns to speak on paper.',
+    taglineTr: 'Sonra kâğıtta konuşmayı öğrenir.',
+    body: 'Every surface your team touches speaks with one voice, recognised before a single name is read.',
+    bodyTr: 'Ekibinizin dokunduğu her yüzey tek bir sesle konuşur, adı okunmadan tanınır.',
+    accent: 'amber', room: true, enabled: true },
+  { id: 'f03', level: '03', name: 'Motion', nameTr: 'Hareket',
+    tagline: 'Then it learns to move.',
+    taglineTr: 'Sonra hareket etmeye öğrenir.',
+    body: 'Timings, transitions, the camera that pans instead of cuts. Everything here has a rhythm.',
+    bodyTr: 'Zamanlamalar, geçişler, kesme yerine kayan kamera. Buradaki her şeyin bir ritmi var.',
+    accent: 'amber', room: true, enabled: true },
+  { id: 'f04', level: '04', name: 'Broadcast', nameTr: 'Yayın',
+    tagline: 'Then the whole office sees it.',
+    taglineTr: 'Sonra bütün ofis görür.',
+    body: 'The floor where the meeting stops being a meeting and becomes a transmission.',
+    bodyTr: 'Toplantının toplantı olmaktan çıkıp bir yayına dönüştüğü kat.',
+    accent: 'copper', room: true, enabled: true },
+  { id: 'f05', level: '05', name: 'Systems', nameTr: 'Sistemler',
+    tagline: 'Then it learns to think.',
+    taglineTr: 'Sonra düşünmeyi öğrenir.',
+    body: 'Dashboards, automations and the quiet machinery that keeps everyone else on time.',
+    bodyTr: 'Panolar, otomasyonlar ve herkesi zamanında tutan sessiz makineler.',
+    accent: 'copper', room: true, enabled: true },
+  { id: 'roof', level: 'R', name: 'Boardroom', nameTr: 'Yönetim Kurulu',
+    tagline: 'Small on the outside. Endless inside.',
+    taglineTr: 'Dışarıdan küçük. İçi sonsuz.',
+    body: 'The top floor. Longer tables, longer conversations, the same connection underneath.',
+    bodyTr: 'En üst kat. Daha uzun masalar, daha uzun konuşmalar, altta aynı bağlantı.',
+    accent: 'chrome', room: true, enabled: true }
+];
 
 /* ------------------------------------------------------------------ */
 /* Sound: a lift motor hum and an arrival chime, synthesised live.    */
@@ -146,13 +202,19 @@ function buildPanel(section) {
 
 async function loadTower() {
   let floors = [];
+  let reachable = true;
   try {
     const res = await fetch(API + '/api/floors');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     floors = data.floors || [];
   } catch (err) {
     console.warn('floor fetch failed', err);
+    reachable = false;
+    floors = FALLBACK_FLOORS;
   }
+
+  showApiNotice(reachable);
 
   state.floors = floors;
 
@@ -178,7 +240,7 @@ async function loadTower() {
       const occ = $('.occ-count', section);
       occ.textContent = String(floor.occupants || 0);
       const link = $('.floor__foot .btn', section);
-      link.dataset.href = `/room/${floor.id}`;
+      link.dataset.href = ROZ.roomUrl ? ROZ.roomUrl(floor.id) : `/room/${floor.id}`;
       link.setAttribute('role', 'link');
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -369,7 +431,9 @@ function goToRoom(roomId, label) {
   transitionLabel.textContent = label || roomId;
   transition.classList.add('closing');
   setTimeout(() => {
-    window.location.href = `/room/${encodeURIComponent(roomId)}`;
+    window.location.href = ROZ.roomUrl
+      ? ROZ.roomUrl(roomId)
+      : `/room/${encodeURIComponent(roomId)}`;
   }, 780);
 }
 
@@ -433,5 +497,20 @@ window.addEventListener('resize', () => moveRailCar(state.activeIndex));
 /* ------------------------------------------------------------------ */
 /* Boot                                                                */
 /* ------------------------------------------------------------------ */
+
+const apiNotice = $('#apiNotice');
+const apiNoticeClose = $('#apiNoticeClose');
+
+function showApiNotice(reachable) {
+  if (!apiNotice) return;
+  apiNotice.hidden = reachable;
+  if (!reachable) apiNotice.classList.add('is-on');
+}
+
+if (apiNoticeClose) {
+  apiNoticeClose.addEventListener('click', () => {
+    if (apiNotice) apiNotice.hidden = true;
+  });
+}
 
 loadTower();

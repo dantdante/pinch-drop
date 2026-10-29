@@ -175,11 +175,42 @@ function iceServers() {
   return list;
 }
 
+/**
+ * Origins allowed to talk to this server from a browser.
+ *
+ * The lobby, the rooms and the control room may be served as plain files
+ * from GitHub Pages while the signalling server runs somewhere else, so the
+ * API has to answer cross-origin requests. By default every origin is
+ * allowed (the API carries no cookies — the admin token travels in the
+ * Authorization header). Set ALLOWED_ORIGINS to a comma separated list to
+ * lock it down, e.g.
+ *
+ *   ALLOWED_ORIGINS=https://dantdante.github.io,https://tower.up.railway.app
+ */
+function allowedOrigins() {
+  const list = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return list;
+}
+
+/** True when `origin` may talk to this server. */
+function originAllowed(origin) {
+  if (!origin) return false;
+  const list = allowedOrigins();
+  if (!list.length) return true; // open by default
+  if (list.includes('*')) return true;
+  return list.includes(origin);
+}
+
 module.exports = {
   ROOT,
   DATA_DIR,
   PERSISTENT,
   iceServers,
+  allowedOrigins,
+  originAllowed,
   DEFAULT_FLOORS,
   OWNER_PASSWORD,
   OPERATOR_PASSWORD,
