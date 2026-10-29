@@ -1,11 +1,14 @@
 # Pinch Drop
 
+**Live now:** the site on GitHub Pages → https://dantdante.github.io/pinch-drop/
+· the signalling server on Render → https://pinch-drop.onrender.com
+
 A video-meeting tower. The lobby is a shaft: scroll and the lift climbs, each floor is an
 elevator you can walk into, and behind every door is a live video room.
 
 The visual language borrows from [riseof.digital](https://riseof.digital/) — dark editorial
 typography, brass accents, film grain, numbered floors, a bilingual EN/TR voice, and elevator
-doors that open as you arrive.
+doors that open as you arrive. The mark is a `pd` monogram in a squircle.
 
 ```
 npm install

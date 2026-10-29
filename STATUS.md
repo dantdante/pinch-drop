@@ -48,6 +48,23 @@ node test/live.js         # 15/15  the real deployment, over the internet
 `test/live.js` drives the published site, not a local copy — it is the one that proves
 the deployment works.
 
+## How it is deployed
+
+Two halves, deliberately separate:
+
+| Half | Where | What it does |
+| --- | --- | --- |
+| The interface | GitHub Pages, branch `gh-pages` | plain HTML/CSS/JS, rebuilt and pushed by `scripts/publish-pages.sh` |
+| The signalling server | Render, service `pinch-drop` | Express + Socket.IO, built from the `Dockerfile` in the repo |
+
+`deploy.json` holds the address of the backend and is read by `scripts/build-pages.js`,
+so a rebuild always points the static site at the right server.
+
+The service already exists (created with the Render CLI), so **do not apply
+`render.yaml` on top of it** — the Blueprint would try to create a second service with
+the same name. `render.yaml` is kept for reproducibility and for anyone who would rather
+start from scratch.
+
 ## Still to do
 
 **The CI and Docker workflows are parked.** GitHub refuses to let a personal access
