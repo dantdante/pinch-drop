@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Room · Pinch Drop</title>
+<link rel="icon" type="image/png" href="./img/favicon.png" />
+<link rel="apple-touch-icon" href="./img/apple-touch-icon.png" />
+<link rel="stylesheet" href="./css/base.css" />
+<link rel="stylesheet" href="./css/room.css" />
+</head>
+<body class="is-room">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="roombar">
+  <a class="brand" href="./">
+    <img class="brand__mark" src="./img/pinch-drop.png" width="26" height="26" alt="" aria-hidden="true" />
+    <span class="brand__text">Pinch<span class="brand__thin"> </span>Drop</span>
+  </a>
+
+  <div class="roombar__center">
+    <div class="roomchip">
+      <span class="roomchip__level" id="roomLevel">G</span>
+      <span class="roomchip__name" id="roomName">Room</span>
+      <span class="roomchip__code" id="roomCode"></span>
+    </div>
+  </div>
+
+  <div class="roombar__right">
+    <span class="connstate" id="connState" data-state="idle"><i></i><span>Waiting for others</span></span>
+    <span class="recdot" id="recBadge" hidden><i></i>REC</span>
+    <span class="roomclock" id="clock">00:00</span>
+    <button class="ghost ghost--danger" id="leaveBtn" type="button">Leave</button>
+  </div>
+</header>
+
+<main class="room">
+  <section class="stage" id="stage">
+    <div class="grid" id="grid"></div>
+
+    <div class="emptystate" id="emptystate">
+      <div class="emptystate__lamp" aria-hidden="true"></div>
+      <div class="emptystate__copy">
+        <h2 class="display emptystate__title">The room is empty<span>.</span></h2>
+        <p class="lede">You are the only one here. Share the room code and the doors will open for whoever walks in.</p>
+      </div>
+      <button class="btn btn--ghost" id="copyCode" type="button">Copy invite code</button>
+    </div>
+
+    <div class="floaters" id="floaters" aria-hidden="true"></div>
+
+    <button class="audiohint" id="audioHint" type="button" hidden>
+      <span class="audiohint__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </span>
+      Tap for sound
+    </button>
+
+    <div class="pinbar" id="pinbar" hidden>
+      <span id="pinName"></span>
+      <button class="ghost" id="unpin" type="button">Unpin</button>
+    </div>
+  </section>
+
+  <aside class="side" id="side" data-open="false">
+    <div class="side__tabs">
+      <button class="side__tab is-active" data-tab="people" type="button">People <b id="peopleCount">1</b></button>
+      <button class="side__tab" data-tab="chat" type="button">Chat <b id="chatCount">0</b></button>
+      <button class="side__close ghost" id="sideClose" type="button">✕</button>
+    </div>
+
+    <div class="side__panel is-active" data-panel="people">
+      <ul class="people" id="people"></ul>
+    </div>
+
+    <div class="side__panel" data-panel="chat">
+      <div class="chat" id="chat"></div>
+      <form class="chat__form" id="chatForm">
+        <input id="chatInput" maxlength="800" placeholder="Say something…" aria-label="Chat message" autocomplete="off" />
+        <button class="btn btn--ghost" type="submit">Send</button>
+      </form>
+    </div>
+  </aside>
+</main>
+
+<footer class="dock" id="dock">
+  <div class="dock__group">
+    <button class="dock__btn" id="micBtn" type="button" data-on="false">
+      <span class="dock__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </span>
+      <span class="dock__label">Mute</span>
+      <span class="dock__state" id="micState"></span>
+    </button>
+
+    <button class="dock__btn" id="camBtn" type="button" data-on="true">
+      <span class="dock__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10.5 21 7.5v9l-5.5-3z"/></svg>
+      </span>
+      <span class="dock__label">Camera</span>
+      <span class="dock__state" id="camState"></span>
+    </button>
+
+    <button class="dock__btn" id="shareBtn" type="button" data-on="false">
+      <span class="dock__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </span>
+      <span class="dock__label">Share</span>
+      <span class="dock__state" id="shareState"></span>
+    </button>
+
+    <div class="dock__reactions" id="reactionBar">
+      <button class="dock__btn dock__btn--emoji" data-emoji="👍" type="button">👍</button>
+      <button class="dock__btn dock__btn--emoji" data-emoji="🎉" type="button">🎉</button>
+      <button class="dock__btn dock__btn--emoji" data-emoji="❤️" type="button">❤️</button>
+      <button class="dock__btn dock__btn--emoji" data-emoji="🤔" type="button">🤔</button>
+    </div>
+
+    <button class="dock__btn" id="handBtn" type="button" data-on="false">
+      <span class="dock__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5v-4a1.5 1.5 0 0 1 3 0V11m0-2a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.2-3l-1.6-2.8a1.4 1.4 0 0 1 2.3-1.6L8 15V8.5a1.5 1.5 0 0 1 3 0"/></svg>
+      </span>
+      <span class="dock__label">Raise hand</span>
+      <span class="dock__state" id="handState"></span>
+    </button>
+
+    <button class="dock__btn" id="peopleBtn" type="button" data-on="false">
+      <span class="dock__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19a6.5 6.5 0 0 1 13 0M16 5.5a3 3 0 0 1 0 5.8M18 19a6 6 0 0 0-2.2-4.6"/></svg>
+      </span>
+      <span class="dock__label">People</span>
+      <span class="dock__state" id="peopleState">1</span>
+    </button>
+
+    <button class="dock__btn" id="chatBtn" type="button" data-on="false">
+      <span class="dock__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"/></svg>
+      </span>
+      <span class="dock__label">Chat</span>
+      <span class="dock__state" id="chatState">0</span>
+    </button>
+
+    <button class="dock__btn" id="recBtn" type="button" data-on="false">
+      <span class="dock__icon" aria-hidden="true">
+        <circle cx="12" cy="12" r="7" fill="currentColor" stroke="none"/>
+      </span>
+      <span class="dock__label">Record</span>
+      <span class="dock__state" id="recState"></span>
+    </button>
+  </div>
+</footer>
+
+<!-- ── pre-join ────────────────────────────────────────────── -->
+<div class="prejoin" id="prejoin">
+  <div class="prejoin__card">
+    <div class="prejoin__head">
+      <p class="eyebrow">Pre-join<span class="eyebrow__tr">Ön kayıt</span></p>
+      <h2 class="display prejoin__title" id="prejoinTitle">Room</h2>
+    </div>
+
+    <div class="prejoin__preview">
+      <video id="preview" autoplay playsinline muted></video>
+      <div class="prejoin__fallback" id="previewFallback"><span id="previewInitials">?</span></div>
+      <span class="prejoin__badge" id="previewBadge">Camera off</span>
+    </div>
+
+    <div class="prejoin__row">
+      <label class="prejoin__label" for="nameInput">Your name</label>
+      <input class="field" id="nameInput" maxlength="32" placeholder="Guest" autocomplete="name" />
+    </div>
+
+    <div class="prejoin__row prejoin__row--split">
+      <div>
+        <label class="prejoin__label" for="camSelect">Camera</label>
+        <select class="field" id="camSelect"></select>
+      </div>
+      <div>
+        <label class="prejoin__label" for="micSelect">Microphone</label>
+        <select class="field" id="micSelect"></select>
+      </div>
+    </div>
+
+    <div class="prejoin__actions">
+      <button class="btn btn--ghost" id="prejoinMic" type="button">Mute mic</button>
+      <button class="btn btn--ghost" id="prejoinCam" type="button">Stop camera</button>
+      <button class="btn btn--gold" id="joinBtn" type="button">Join room</button>
+    </div>
+
+    <p class="prejoin__note" id="prejoinNote">Your browser will ask for camera and microphone access.</p>
+  </div>
+</div>
+
+<!-- ── toast / notice ──────────────────────────────────────── -->
+<div class="toast" id="toast" hidden></div>
+
+<script src="./config.js"></script>
+<script src="./js/host.js"></script>
+<script src="./js/room.js"></script>
+</body>
+</html>

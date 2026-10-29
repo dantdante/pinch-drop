@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Control room · Pinch Drop</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/png" href="./img/favicon.png" />
+<link rel="apple-touch-icon" href="./img/apple-touch-icon.png" />
+<link rel="stylesheet" href="./css/base.css" />
+<link rel="stylesheet" href="./css/admin.css" />
+</head>
+<body class="is-admin">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- ── login ───────────────────────────────────────────────── -->
+<div class="gate" id="gate">
+  <div class="gate__card">
+    <div class="gate__head">
+      <p class="eyebrow">Control room<span class="eyebrow__tr">Kontrol odası</span></p>
+      <h1 class="display gate__title">Restricted<span>.</span></h1>
+      <p class="lede">This floor is not on the public index. Enter the operator password to continue.</p>
+    </div>
+
+    <form class="gate__form" id="loginForm" autocomplete="off">
+      <label class="prejoin__label" for="passwordInput">Password</label>
+      <input class="field" type="password" id="passwordInput" placeholder="••••••••••" autocomplete="current-password" required />
+      <button class="btn btn--gold" type="submit" id="loginBtn">Unlock</button>
+    </form>
+
+    <p class="gate__note" id="gateNote">Two credentials exist: an owner password and an operator password.</p>
+  </div>
+</div>
+
+<!-- ── dashboard ───────────────────────────────────────────── -->
+<div class="dash" id="dash" hidden>
+  <header class="dashbar">
+    <div class="dashbar__left">
+      <a class="brand" href="./">
+        <img class="brand__mark" src="./img/pinch-drop.png" width="26" height="26" alt="" aria-hidden="true" />
+        <span class="brand__text">Control room</span>
+      </a>
+      <span class="rolechip" id="roleChip">Operator</span>
+    </div>
+
+    <div class="dashbar__right">
+      <span class="livebadge" id="liveBadge" data-state="idle"><i></i><span>Polling</span></span>
+      <span class="dashbar__clock" id="dashClock">—</span>
+      <button class="ghost" id="refreshBtn" type="button">Refresh</button>
+      <a class="ghost" href="./">Back to tower</a>
+      <button class="ghost" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </header>
+
+  <main class="dashbody">
+    <nav class="tabs" id="tabs">
+      <button class="tab is-active" data-tab="overview" type="button">Overview</button>
+      <button class="tab" data-tab="rooms" type="button">Rooms</button>
+      <button class="tab" data-tab="people" type="button">People</button>
+      <button class="tab" data-tab="floors" type="button">Floors</button>
+      <button class="tab" data-tab="broadcast" type="button">Broadcast</button>
+      <button class="tab" data-tab="security" type="button">Security</button>
+      <button class="tab" data-tab="audit" type="button">Audit</button>
+    </nav>
+
+    <!-- overview -->
+    <section class="panelview is-active" data-view="overview">
+      <div class="statgrid" id="statGrid"></div>
+      <div class="cards">
+        <article class="card">
+          <h3 class="card__title">Live rooms</h3>
+          <div class="card__body" id="cardRooms"><p class="muted">Loading…</p></div>
+        </article>
+        <article class="card">
+          <h3 class="card__title">System</h3>
+          <div class="card__body" id="cardSystem"><p class="muted">Loading…</p></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- rooms -->
+    <section class="panelview" data-view="rooms">
+      <div class="card">
+        <h3 class="card__title">Rooms in the tower</h3>
+        <div class="card__body tablewrap">
+          <table class="table" id="roomsTable">
+            <thead>
+              <tr><th>Room</th><th>Kind</th><th>People</th><th>Created</th><th>State</th><th class="right">Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- people -->
+    <section class="panelview" data-view="people">
+      <div class="card">
+        <h3 class="card__title">Connected people</h3>
+        <div class="card__body tablewrap">
+          <table class="table" id="peopleTable">
+            <thead>
+              <tr><th>Name</th><th>Room</th><th>Joined</th><th>State</th><th>Address</th><th class="right">Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- floors -->
+    <section class="panelview" data-view="floors">
+      <div class="card">
+        <h3 class="card__title">Floors</h3>
+        <div class="card__body" id="floorsList"></div>
+      </div>
+    </section>
+
+    <!-- broadcast -->
+    <section class="panelview" data-view="broadcast">
+      <div class="card">
+        <h3 class="card__title">Broadcast a notice</h3>
+        <div class="card__body">
+          <p class="muted">The message appears on every screen in every room, open or not.</p>
+          <textarea class="field field--area" id="broadcastText" rows="3" maxlength="500" placeholder="Server maintenance at 22:00 — rooms close briefly."></textarea>
+          <div class="row">
+            <button class="btn btn--gold" id="broadcastSend" type="button">Send to everyone</button>
+            <span class="muted" id="broadcastStatus"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card__title">Maintenance</h3>
+        <div class="card__body">
+          <label class="switch">
+            <input type="checkbox" id="maintenanceToggle" />
+            <span class="switch__track"><span class="switch__dot"></span></span>
+            <span class="switch__label">Take the tower offline</span>
+          </label>
+          <p class="muted">While maintenance is on, no new participant can enter any room.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- security -->
+    <section class="panelview" data-view="security">
+      <div class="cards">
+        <article class="card">
+          <h3 class="card__title">Blocked addresses</h3>
+          <div class="card__body">
+            <div class="row row--stack">
+              <input class="field" id="blockAddress" placeholder="203.0.113.24" />
+              <button class="btn btn--ghost" id="blockBtn" type="button">Block</button>
+            </div>
+            <ul class="blocklist" id="blockList"></ul>
+          </div>
+        </article>
+
+        <article class="card" id="passwordCard">
+          <h3 class="card__title">Change a password</h3>
+          <div class="card__body">
+            <p class="muted" id="passwordHint">Owner access required.</p>
+            <label class="prejoin__label" for="pwTarget">Credential</label>
+            <select class="field" id="pwTarget">
+              <option value="owner">Owner password</option>
+              <option value="admin">Operator password</option>
+            </select>
+            <label class="prejoin__label" for="pwValue">New password</label>
+            <input class="field" type="text" id="pwValue" placeholder="minimum 6 characters" autocomplete="off" />
+            <button class="btn btn--gold" id="pwSave" type="button">Update</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- audit -->
+    <section class="panelview" data-view="audit">
+      <div class="card">
+        <h3 class="card__title">Audit log</h3>
+        <div class="card__body">
+          <ul class="audit" id="auditList"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="./config.js"></script>
+<script src="./js/host.js"></script>
+<script src="./js/admin.js"></script>
+</body>
+</html>
