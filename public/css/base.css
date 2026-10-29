@@ -1,5 +1,5 @@
 /* ==========================================================
-   Rise of Zoom — base tokens, primitives
+   Pinch Drop — base tokens, primitives
    ========================================================== */
 
 :root {
@@ -194,7 +194,14 @@ body {
   justify-self: start;
 }
 .brand:hover { color: var(--brass-lit); }
-.brand__mark { color: var(--brass); display: inline-flex; }
+.brand__mark {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 7px;
+  flex: 0 0 auto;
+}
 .brand__text {
   font-family: var(--font-mono);
   font-size: 0.74rem;

@@ -1,5 +1,5 @@
 /* ==========================================================
-   Rise of Zoom — static-host resilience
+   Pinch Drop — static-host resilience
    ----------------------------------------------------------
    When the lobby is served from a static host (GitHub Pages)
    and the signalling server cannot be reached, the tower

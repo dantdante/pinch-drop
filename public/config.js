@@ -1,5 +1,5 @@
 /* ==========================================================
-   Rise of Zoom — deployment configuration
+   Pinch Drop — deployment configuration
    ----------------------------------------------------------
    This file is safe to edit before publishing and is the one
    place the client learns where the signalling server lives.
@@ -9,7 +9,7 @@
                                    separately hosted signalling server
    ========================================================== */
 
-window.RISE_OF_ZOOM = {
+window.PINCH_DROP = {
   apiBase: '',
   // static: true when the page is served as plain files (GitHub Pages) and
   // the signalling server lives on another origin. It switches the room and

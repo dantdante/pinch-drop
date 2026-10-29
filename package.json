@@ -1,5 +1,5 @@
 {
-  "name": "rise-of-zoom",
+  "name": "pinch-drop",
   "version": "1.0.0",
   "description": "A video-meeting tower in the spirit of riseof.digital \u2014 take the lift, pick a floor, step into the room.",
   "main": "server/index.js",
@@ -17,7 +17,7 @@
     "test:static": "node test/static-site.js",
     "build:pages": "node scripts/build-pages.js",
     "setup:browser": "npx playwright install --with-deps chromium",
-    "docker:build": "docker build -t rise-of-zoom .",
+    "docker:build": "docker build -t pinch-drop .",
     "docker:up": "docker compose up -d",
     "publish:github": "bash scripts/publish-github.sh",
     "publish:pages": "bash scripts/publish-pages.sh",

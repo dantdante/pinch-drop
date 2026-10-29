@@ -554,5 +554,5 @@ app.use((err, req, res, next) => {
 });
 
 server.listen(config.PORT, config.HOST, () => {
-  console.log(`Rise of Zoom — tower online at http://${config.HOST}:${config.PORT}`);
+  console.log(`Pinch Drop — tower online at http://${config.HOST}:${config.PORT}`);
 });

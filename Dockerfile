@@ -1,4 +1,4 @@
-# Rise of Zoom — the whole tower in one image.
+# Pinch Drop — the whole tower in one image.
 FROM node:20-alpine
 
 WORKDIR /app

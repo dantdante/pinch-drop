@@ -1,4 +1,4 @@
-# Rise of Zoom — status
+# Pinch Drop — status
 
 _Last updated: 29 October 2026_
 
@@ -6,8 +6,8 @@ _Last updated: 29 October 2026_
 
 | Thing | Address | State |
 | --- | --- | --- |
-| GitHub Pages site | https://dantdante.github.io/rise-of-zoom/ | ✅ live, 14 assets, tower renders 7 floors |
-| GitHub repo | https://github.com/dantdante/rise-of-zoom | ✅ public, MIT, 8 topics |
+| GitHub Pages site | https://dantdante.github.io/pinch-drop/ | ✅ live, 14 assets, tower renders 7 floors |
+| GitHub repo | https://github.com/dantdante/pinch-drop | ✅ public, MIT, 8 topics |
 | Local preview | http://0.0.0.0:4321 | ✅ running |
 | Render backend | — | ⏳ waiting on a Render API key |
 
@@ -28,7 +28,7 @@ ebb5d50  Add a Render deployment script
 Push them with:
 
 ```bash
-cd /home/user/riseof-zoom
+cd /home/user/pinch-drop
 TOKEN=<github token>
 BASIC=$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\n')
 git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $BASIC" push origin main

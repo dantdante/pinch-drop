@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
-# Publish Rise of Zoom to GitHub.
+# Publish Pinch Drop to GitHub.
 #
 #   ./scripts/publish-github.sh                 # using the gh CLI
 #   GITHUB_TOKEN=ghp_xxx ./scripts/publish-github.sh
 #
 set -euo pipefail
 
-REPO_SLUG="${REPO_SLUG:-rise-of-zoom}"
+REPO_SLUG="${REPO_SLUG:-pinch-drop}"
 DESCRIPTION="A video-meeting tower — take the lift, pick a floor, step into the room."
 TOPICS="webrtc,videoconference,zoom-clone,socket-io,elevator,rise-of-digital"
 
@@ -21,9 +21,9 @@ fi
 if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
   echo "→ committing"
   git add -A
-  git -c user.name="${GIT_USER_NAME:-Rise of Zoom}" \
-      -c user.email="${GIT_USER_EMAIL:-bot@rise-of-zoom.local}" \
-      commit -q -m "Rise of Zoom — tower, control room and real-time media"
+  git -c user.name="${GIT_USER_NAME:-Pinch Drop}" \
+      -c user.email="${GIT_USER_EMAIL:-bot@pinch-drop.local}" \
+      commit -q -m "Pinch Drop — tower, control room and real-time media"
 fi
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then

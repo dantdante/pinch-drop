@@ -1,14 +1,14 @@
 /* ==========================================================
-   Rise of Zoom — lobby behaviour
+   Pinch Drop — lobby behaviour
    ========================================================== */
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   /* Deployment configuration — see /config.js */
-  const CFG = window.RISE_OF_ZOOM || {};
+  const CFG = window.PINCH_DROP || {};
   const API = (CFG.apiBase || '').replace(/\/$/, '');
-  const ROZ = window.ROZ || {};
+  const ROZ = window.PD || {};
 
 const shaft = $('#shaft');
 const floorTemplate = $('#floorTemplate');
@@ -205,8 +205,8 @@ async function loadTower() {
   let reachable = true;
   let waking = false;
   try {
-    const res = await (ROZ.fetchWithTimeout
-      ? ROZ.fetchWithTimeout(API + '/api/floors', null, 15000)
+    const res = await (PD.fetchWithTimeout
+      ? PD.fetchWithTimeout(API + '/api/floors', null, 15000)
       : fetch(API + '/api/floors'));
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
@@ -247,7 +247,7 @@ async function loadTower() {
       const occ = $('.occ-count', section);
       occ.textContent = String(floor.occupants || 0);
       const link = $('.floor__foot .btn', section);
-      link.dataset.href = ROZ.roomUrl ? ROZ.roomUrl(floor.id) : `/room/${floor.id}`;
+      link.dataset.href = PD.roomUrl ? PD.roomUrl(floor.id) : `/room/${floor.id}`;
       link.setAttribute('role', 'link');
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -438,8 +438,8 @@ function goToRoom(roomId, label) {
   transitionLabel.textContent = label || roomId;
   transition.classList.add('closing');
   setTimeout(() => {
-    window.location.href = ROZ.roomUrl
-      ? ROZ.roomUrl(roomId)
+    window.location.href = PD.roomUrl
+      ? PD.roomUrl(roomId)
       : `/room/${encodeURIComponent(roomId)}`;
   }, 780);
 }

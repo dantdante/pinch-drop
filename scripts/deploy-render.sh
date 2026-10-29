@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Deploy Rise of Zoom to Render.
+# Deploy Pinch Drop to Render.
 #
 #   RENDER_API_KEY=rnd_xxx bash scripts/deploy-render.sh
 #
@@ -12,15 +12,15 @@
 #
 # Afterwards the static site on GitHub Pages can point at that address:
 #
-#   node scripts/build-pages.js --api-base https://rise-of-zoom.onrender.com
+#   node scripts/build-pages.js --api-base https://pinch-drop.onrender.com
 #
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 RENDER="${RENDER:-render}"
-REPO="https://github.com/dantdante/rise-of-zoom"
-SERVICE_NAME="${SERVICE_NAME:-rise-of-zoom}"
+REPO="https://github.com/dantdante/pinch-drop"
+SERVICE_NAME="${SERVICE_NAME:-pinch-drop}"
 REGION="${REGION:-oregon}"
 PLAN="${PLAN:-free}"
 

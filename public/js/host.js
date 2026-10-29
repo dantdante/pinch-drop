@@ -1,5 +1,5 @@
 /* ==========================================================
-   Rise of Zoom — hosting helper
+   Pinch Drop — hosting helper
    ----------------------------------------------------------
    One small file that knows how the app is being served, so
    the rest of the client never has to guess:
@@ -14,13 +14,13 @@
          admin  →  ./admin.html
          room   →  ./room.html?room=f01
 
-   The mode is read from /config.js → window.RISE_OF_ZOOM.
+   The mode is read from /config.js → window.PINCH_DROP.
    ========================================================== */
 
 (function () {
   'use strict';
 
-  const CFG = window.RISE_OF_ZOOM || {};
+  const CFG = window.PINCH_DROP || {};
   const API = (CFG.apiBase || '').replace(/\/$/, '');
   const STATIC = !!CFG.static;
 
@@ -80,7 +80,7 @@
     return p.finally(() => clearTimeout(timer));
   }
 
-  window.ROZ = {
+  window.PD = {
     CFG,
     API,
     STATIC,

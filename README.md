@@ -1,4 +1,4 @@
-# Rise of Zoom
+# Pinch Drop
 
 A video-meeting tower. The lobby is a shaft: scroll and the lift climbs, each floor is an
 elevator you can walk into, and behind every door is a live video room.
@@ -33,7 +33,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx ./scripts/publish-github.sh
 Or push it yourself:
 
 ```bash
-git remote add origin https://github.com/<you>/rise-of-zoom.git
+git remote add origin https://github.com/<you>/pinch-drop.git
 git push -u origin main
 ```
 
@@ -42,7 +42,7 @@ git push -u origin main
 | File | What it does |
 | --- | --- |
 | `.github/workflows/ci.yml` | Runs the whole test suite on every push, then publishes GitHub Pages |
-| `.github/workflows/docker.yml` | Builds `ghcr.io/<you>/rise-of-zoom` on a `v*` tag |
+| `.github/workflows/docker.yml` | Builds `ghcr.io/<you>/pinch-drop` on a `v*` tag |
 | `Dockerfile` / `docker-compose.yml` | The whole tower in one container |
 | `render.yaml` | Render Blueprint — one-click deploy, builds the Dockerfile, health-check on `/api/health` |
 | `.env.example` | Every environment variable with its default and what it controls |
@@ -56,10 +56,10 @@ git push -u origin main
 
 **A · The whole tower on Render (recommended for this repo).** Render reads `render.yaml`,
 builds the `Dockerfile` in the repo root and serves the app over HTTPS with WebSockets on
-one address — lobby, rooms and control room all on `https://rise-of-zoom.onrender.com`.
+one address — lobby, rooms and control room all on `https://pinch-drop.onrender.com`.
 
 1. Push the repo to GitHub (see [Publishing to GitHub](#publishing-to-github)).
-2. In Render: **New → Blueprint → connect `dantdante/rise-of-zoom` → Apply**. Render picks up
+2. In Render: **New → Blueprint → connect `dantdante/pinch-drop` → Apply**. Render picks up
    `render.yaml` and the `Dockerfile` automatically — no build command needed.
 3. Render assigns a `PORT` and a public address. The app already honours `PORT` and binds
    `0.0.0.0`, so nothing else has to change.
@@ -86,13 +86,13 @@ only files, so it can host the beautiful tower interface while the Node server d
 signalling. Set the API base in `public/config.js`:
 
 ```js
-window.RISE_OF_ZOOM = { apiBase: 'https://rise-of-zoom.onrender.com' };
+window.PINCH_DROP = { apiBase: 'https://pinch-drop.onrender.com' };
 ```
 
 The `pages` job in `ci.yml` does this automatically using the **SIGNALLING_URL** repository
 variable, so a Pages build points at your hosted backend with no edits. Set it in
 **Settings → Secrets and variables → Actions → Variables**: `SIGNALLING_URL =
-https://rise-of-zoom.onrender.com`.
+https://pinch-drop.onrender.com`.
 
 > WebRTC needs a secure context. GitHub Pages is already HTTPS; your backend must be too —
 > Render gives you HTTPS by default.
@@ -112,7 +112,7 @@ apart. That is what makes a GitHub Pages site possible.
 | Assets | `/css/…`, `/js/…` | `./css/…`, `./js/…` |
 | Socket.IO client | same origin | the backend's origin |
 
-`public/js/host.js` reads `window.RISE_OF_ZOOM` and builds the right links for whichever
+`public/js/host.js` reads `window.PINCH_DROP` and builds the right links for whichever
 mode is active, so the same source runs in both places.
 
 Two details make the split work:
@@ -129,7 +129,7 @@ fallback catalogue and shows a clear notice instead of an empty building.
 Build the static site locally with:
 
 ```bash
-npm run build:pages -- --api-base https://rise-of-zoom.onrender.com --out _site
+npm run build:pages -- --api-base https://pinch-drop.onrender.com --out _site
 ```
 
 ---

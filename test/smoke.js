@@ -1,4 +1,4 @@
-/* Integration smoke test for the Rise of Zoom tower. */
+/* Integration smoke test for the Pinch Drop tower. */
 'use strict';
 
 const { io } = require('socket.io-client');

@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /* ==========================================================
-   Rise of Zoom — static site build
+   Pinch Drop — static site build
    ----------------------------------------------------------
    Produces a folder of plain files that GitHub Pages can serve:
    the lobby, the room and the control room, all talking to a
    signalling server that lives somewhere else.
 
-       node scripts/build-pages.js --api-base https://rise-of-zoom.onrender.com
+       node scripts/build-pages.js --api-base https://pinch-drop.onrender.com
        node scripts/build-pages.js --api-base https://… --out dist
 
    What it does:
      1. copies public/ into the output folder
      2. rewrites every absolute path ("/css/base.css") to a
         relative one ("./css/base.css") so the site works from
-        a project sub-path such as /rise-of-zoom/
+        a project sub-path such as /pinch-drop/
      3. writes config.js with the API base and static: true
      4. drops a .nojekyll marker and a 404.html fallback
    ========================================================== */

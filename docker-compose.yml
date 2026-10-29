@@ -1,7 +1,7 @@
 services:
   tower:
     build: .
-    image: rise-of-zoom
+    image: pinch-drop
     restart: unless-stopped
     ports:
       - "4321:4321"

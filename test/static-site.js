@@ -1,5 +1,5 @@
 /* ==========================================================
-   Rise of Zoom — static host end-to-end test
+   Pinch Drop — static host end-to-end test
    ----------------------------------------------------------
    Proves the GitHub Pages deployment works: the site is built
    as plain files, served from a different origin than the

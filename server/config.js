@@ -185,7 +185,7 @@ function iceServers() {
  * Authorization header). Set ALLOWED_ORIGINS to a comma separated list to
  * lock it down, e.g.
  *
- *   ALLOWED_ORIGINS=https://dantdante.github.io,https://rise-of-zoom.onrender.com
+ *   ALLOWED_ORIGINS=https://dantdante.github.io,https://pinch-drop.onrender.com
  */
 function allowedOrigins() {
   const list = (process.env.ALLOWED_ORIGINS || '')

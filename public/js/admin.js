@@ -1,5 +1,5 @@
 /* ==========================================================
-   Rise of Zoom — control room client
+   Pinch Drop — control room client
    ========================================================== */
 
 (function () {
@@ -9,9 +9,9 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   /* Deployment configuration — see /config.js */
-  const CFG = window.RISE_OF_ZOOM || {};
+  const CFG = window.PINCH_DROP || {};
   const API = (CFG.apiBase || '').replace(/\/$/, '');
-  const ROZ = window.ROZ || {};
+  const ROZ = window.PD || {};
 
   const gate = $('#gate');
   const dash = $('#dash');
@@ -38,7 +38,7 @@
        not the page origin when the control room is served statically. */
     let ioClient;
     try {
-      ioClient = await (ROZ.ensureSocketIO ? ROZ.ensureSocketIO() : Promise.resolve(window.io));
+      ioClient = await (PD.ensureSocketIO ? PD.ensureSocketIO() : Promise.resolve(window.io));
     } catch (err) {
       console.warn('live updates unavailable', err);
       renderLiveBadge();

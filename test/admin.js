@@ -92,7 +92,8 @@ async function adminPage(browser, password) {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: tempPw })
   })).json();
   loginWithTemp.ok && loginWithTemp.role === 'owner' ? ok('changed owner password takes effect') : bad('password change', JSON.stringify(loginWithTemp));
-  const credFile = require('fs').readFileSync('/home/user/riseof-zoom/data/credentials.json', 'utf8');
+  const credFile = require('fs')
+    .readFileSync(require('path').join(__dirname, '..', 'data', 'credentials.json'), 'utf8');
   credFile.includes('owner') ? ok('changed password is written to disk (survives restart)') : bad('credentials persistence');
 
   // put the original password back
