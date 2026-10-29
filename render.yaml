@@ -1,0 +1,85 @@
+# ==========================================================
+#  Rise of Zoom — Render Blueprint
+# ----------------------------------------------------------
+#  One click: https://render.com → New → Blueprint → pick
+#  this repository. Render reads this file and builds the
+#  Dockerfile in the repo root.
+#
+#  After the first deploy, Render gives the service a public
+#  address on *.onrender.com. Put that address in the
+#  GitHub Pages site (repository variable SIGNALLING_URL) and
+#  the tower comes alive.
+# ==========================================================
+
+services:
+  - type: web
+    runtime: docker
+    name: rise-of-zoom
+    repo: https://github.com/dantdante/rise-of-zoom
+    branch: main
+    region: oregon
+
+    # "free" never costs anything but spins the service down after
+    # 15 idle minutes, so the first request after a pause waits for
+    # the container to wake. Switch to "starter" for a service that
+    # stays warm.
+    plan: free
+
+    # The app honours PORT (Render assigns it) and binds 0.0.0.0.
+    # The Dockerfile already starts the server, so no startCommand.
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    healthCheckPath: /api/health
+
+    # Every push to main rebuilds and redeploys.
+    autoDeployTrigger: onCommit
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: HOST
+        value: 0.0.0.0
+
+      # Signs the control-room sessions. Render generates a new one each
+      # time the blueprint is applied.
+      - key: SESSION_SECRET
+        generateValue: true
+
+      # The control-room credentials. Set them once in the Render
+      # dashboard; the blueprint only asks for them.
+      - key: ADMIN_OWNER_PASSWORD
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      # Lock the API down to the GitHub Pages origin. Add your own
+      # domain to the list when you have one.
+      - key: ALLOWED_ORIGINS
+        value: https://dantdante.github.io
+
+      # Where floors, settings, blocklist, audit log and changed
+      # passwords are written.
+      - key: DATA_DIR
+        value: /app/data
+
+      # --- TURN relay ------------------------------------------------
+      # STUN alone is enough on most home networks. Add a TURN server
+      # if calls must work behind symmetric NAT or strict firewalls.
+      - key: TURN_URLS
+        sync: false
+      - key: TURN_USERNAME
+        sync: false
+      - key: TURN_CREDENTIAL
+        sync: false
+
+    # A persistent disk keeps the floors, the blocklist, the audit log
+    # and any changed password across restarts and redeploys.
+    # Disks need a paid plan — uncomment the block below once the
+    # service is on "starter" or higher.
+    #
+    # disk:
+    #   name: data
+    #   mountPath: /app/data
+    #   sizeGB: 1

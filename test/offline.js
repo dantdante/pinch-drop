@@ -97,6 +97,21 @@ function check(label, condition, extra) {
     rendered[0] ? rendered[0].tagline.slice(0, 50) : 'none'
   );
 
+  // The retry button must reload the tower.
+  const retryVisible = await page.evaluate(() => {
+    const b = document.querySelector('#apiNoticeRetry');
+    return !!b && b.offsetParent !== null;
+  });
+  check('notice offers a retry', retryVisible);
+
+  await page.click('#apiNoticeRetry');
+  await page.waitForTimeout(1200);
+  const stillThere = await page.evaluate(() => {
+    const n = document.querySelector('#apiNotice');
+    return !!n && !n.hidden;
+  });
+  check('retry keeps trying while the backend is down', stillThere);
+
   // The dismiss button must work.
   await page.click('#apiNoticeClose');
   await page.waitForTimeout(300);
@@ -105,6 +120,30 @@ function check(label, condition, extra) {
     return !n || n.hidden;
   });
   check('notice can be dismissed', dismissed);
+
+  // A hanging request means the backend is asleep, not missing.
+  const slow = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await slow.route('**/api/**', async (route) => {
+    await new Promise((r) => setTimeout(r, 30000));
+    route.abort('failed');
+  });
+  await slow.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  await slow.waitForTimeout(17000);
+  const wakingText = await slow.evaluate(() => {
+    const n = document.querySelector('#apiNoticeText');
+    return n ? n.innerText.replace(/\s+/g, ' ').trim() : '';
+  });
+  check(
+    'a hanging request is reported as the server waking up',
+    /waking up/i.test(wakingText),
+    wakingText.slice(0, 70)
+  );
+  const isWaking = await slow.evaluate(() => {
+    const n = document.querySelector('#apiNotice');
+    return !!n && n.classList.contains('is-waking');
+  });
+  check('the waking-up notice is styled differently', isWaking);
+  await slow.close();
 
   await page.screenshot({ path: path.join(SHOTS, '14-offline-notice.png') });
 

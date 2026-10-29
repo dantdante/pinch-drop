@@ -64,6 +64,22 @@
     return socketLoader;
   }
 
+  /* A fetch that gives up after `ms` instead of hanging forever. A free
+     hosting tier sleeps the backend after a few idle minutes, so the very
+     first request can sit there for a minute while the container wakes. */
+  function fetchWithTimeout(url, options, ms) {
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), ms || 15000) : null;
+    const opts = Object.assign({}, options || {});
+    if (controller) opts.signal = controller.signal;
+
+    const p = fetch(url, opts);
+
+    if (!timer) return p;
+
+    return p.finally(() => clearTimeout(timer));
+  }
+
   window.ROZ = {
     CFG,
     API,
@@ -72,6 +88,7 @@
     adminUrl,
     roomUrl,
     socketScriptUrl,
-    ensureSocketIO
+    ensureSocketIO,
+    fetchWithTimeout
   };
 })();

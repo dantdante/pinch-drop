@@ -203,18 +203,25 @@ function buildPanel(section) {
 async function loadTower() {
   let floors = [];
   let reachable = true;
+  let waking = false;
   try {
-    const res = await fetch(API + '/api/floors');
+    const res = await (ROZ.fetchWithTimeout
+      ? ROZ.fetchWithTimeout(API + '/api/floors', null, 15000)
+      : fetch(API + '/api/floors'));
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     floors = data.floors || [];
   } catch (err) {
     console.warn('floor fetch failed', err);
     reachable = false;
+    /* A timed-out request usually means the backend is asleep and waking
+       up — a free hosting tier sleeps the container after a few idle
+       minutes, and the first request waits for it. */
+    waking = err && (err.name === 'AbortError' || /timeout/i.test(String(err.message || '')));
     floors = FALLBACK_FLOORS;
   }
 
-  showApiNotice(reachable);
+  showApiNotice(reachable, waking);
 
   state.floors = floors;
 
@@ -500,17 +507,34 @@ window.addEventListener('resize', () => moveRailCar(state.activeIndex));
 
 const apiNotice = $('#apiNotice');
 const apiNoticeClose = $('#apiNoticeClose');
+const apiNoticeText = $('#apiNoticeText');
+const apiNoticeRetry = $('#apiNoticeRetry');
 
-function showApiNotice(reachable) {
+function showApiNotice(reachable, waking) {
   if (!apiNotice) return;
   apiNotice.hidden = reachable;
-  if (!reachable) apiNotice.classList.add('is-on');
+  apiNotice.classList.toggle('is-on', !reachable);
+  apiNotice.classList.toggle('is-waking', !!waking);
+
+  if (!reachable && apiNoticeText) {
+    apiNoticeText.innerHTML = waking
+      ? '<strong>The signalling server is waking up.</strong> Free hosting sleeps the ' +
+        'server after a few idle minutes — this can take a minute.'
+      : '<strong>Signalling server unreachable.</strong> The tower is showing its ' +
+        'default catalogue — set <code>apiBase</code> in <code>config.js</code> to point ' +
+        'at the backend.';
+  }
+
 }
 
 if (apiNoticeClose) {
   apiNoticeClose.addEventListener('click', () => {
     if (apiNotice) apiNotice.hidden = true;
   });
+}
+
+if (apiNoticeRetry) {
+  apiNoticeRetry.addEventListener('click', () => loadTower());
 }
 
 loadTower();

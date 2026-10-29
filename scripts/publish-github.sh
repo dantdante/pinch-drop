@@ -83,5 +83,5 @@ git remote set-url origin "https://github.com/$USER/$REPO_SLUG.git"
 
 echo
 echo "Done. Open: https://github.com/$USER/$REPO_SLUG"
-echo "Next: deploy to Railway (New project → Deploy from GitHub repo),"
+echo "Next: deploy to Render (New → Blueprint → pick this repository),"
 echo "or enable GitHub Pages — set the SIGNALLING_URL repository variable to your backend."

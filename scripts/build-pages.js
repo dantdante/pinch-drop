@@ -6,7 +6,7 @@
    the lobby, the room and the control room, all talking to a
    signalling server that lives somewhere else.
 
-       node scripts/build-pages.js --api-base https://tower.up.railway.app
+       node scripts/build-pages.js --api-base https://rise-of-zoom.onrender.com
        node scripts/build-pages.js --api-base https://… --out dist
 
    What it does:

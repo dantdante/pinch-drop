@@ -18,11 +18,12 @@
 <!-- ── offline / unreachable signalling notice ─────────────── -->
 <div class="notice" id="apiNotice" role="status" hidden>
   <span class="notice__dot" aria-hidden="true"></span>
-  <span class="notice__text">
+  <span class="notice__text" id="apiNoticeText">
     <strong>Signalling server unreachable.</strong>
     The tower is showing its default catalogue — set
     <code>apiBase</code> in <code>config.js</code> to point at the backend.
   </span>
+  <button class="notice__retry" id="apiNoticeRetry" type="button">Try again</button>
   <button class="notice__close" id="apiNoticeClose" type="button" aria-label="Dismiss">×</button>
 </div>
 
